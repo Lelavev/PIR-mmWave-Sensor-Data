@@ -1,0 +1,311 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+---
+```{r}
+results_cyber_projectG1 <- read.csv2("results cyber projectG1.csv", stringsAsFactors = FALSE)
+```
+
+```{r}
+#checking data and renaming dataset to make callback easier
+cyberdata <- results_cyber_projectG1
+head(cyberdata)
+```
+
+```{r}
+#confusion matrix all data
+table(cyberdata$GroundTruth, cyberdata$Sensor_output)
+```
+```{r}
+#confusion matrix per sensor type
+pir_data <- subset(cyberdata, SensorType == "PIR")
+mmwave_data <- subset(cyberdata, SensorType == "mmWave")
+
+table(pir_data$GroundTruth, pir_data$Sensor_output)
+table(mmwave_data$GroundTruth, mmwave_data$Sensor_output)
+```
+
+```{r}
+#add extra column called 'output' which clearly states when results show TP, TN, FP or FN
+cyberdata$Outcome <- with(cyberdata,
+  ifelse(GroundTruth == 1 & Sensor_output == 1, "TP",
+  ifelse(GroundTruth == 0 & Sensor_output == 0, "TN",
+  ifelse(GroundTruth == 0 & Sensor_output == 1, "FP",
+  ifelse(GroundTruth == 1 & Sensor_output == 0, "FN", NA)))))
+head(cyberdata)
+```
+
+```{r}
+#clear table that shows the output results per sensor type
+table(cyberdata$SensorType, cyberdata$Outcome)
+```
+```{r}
+#extracting TP, TN, FP and FN for PIR individually
+TP_PIR <- sum(pir_data$GroundTruth == 1 & pir_data$Sensor_output == 1)
+TN_PIR <- sum(pir_data$GroundTruth == 0 & pir_data$Sensor_output == 0)
+FP_PIR <- sum(pir_data$GroundTruth == 0 & pir_data$Sensor_output == 1)
+FN_PIR <- sum(pir_data$GroundTruth == 1 & pir_data$Sensor_output == 0)
+```
+
+```{r}
+#now onto the performance metrics of the PIR sensor
+#accuracy: proportion of correct predictions = (TP+TN)/(TP+TN+FP+FN)
+accuracy_PIR <- (TP_PIR + TN_PIR) / (TP_PIR + TN_PIR + FP_PIR + FN_PIR)
+
+#sensitivity/recall/true positive rate: ability to detect actual movement = TP/(TP+FN)
+sensitivity_PIR <- TP_PIR / (TP_PIR + FN_PIR)
+
+#specificity/true negative rate: ability to detect no movement correctly = TN/(TN+FP)
+specificity_PIR <- TN_PIR / (TN_PIR + FP_PIR)
+
+#false positive rate: false alarms = FP/(FP+TN)
+false_positive_rate_PIR <- FP_PIR / (FP_PIR + TN_PIR)
+
+#false negative rate: missed movements = FN/(TP+FN)
+false_negative_rate_PIR <- FN_PIR / (TP_PIR + FN_PIR)
+
+#overall error rate = (FP+FN)/(TP+TN+FP+FN)
+error_rate_PIR <- (FP_PIR + FN_PIR) / (TP_PIR + TN_PIR + FP_PIR + FN_PIR)
+
+cat("Accuracy:", accuracy_PIR, "\n")
+cat("Sensitivity:", sensitivity_PIR, "\n")
+cat("Specificity:", specificity_PIR, "\n")
+cat("False Positive Rate:", false_positive_rate_PIR, "\n")
+cat("False Negative Rate:", false_negative_rate_PIR, "\n")
+cat("Error Rate:", error_rate_PIR, "\n")
+```
+
+```{r}
+#now let's do the same for mmWave sensor
+TP_mmwave <- sum(mmwave_data$GroundTruth == 1 & mmwave_data$Sensor_output == 1)
+TN_mmwave <- sum(mmwave_data$GroundTruth == 0 & mmwave_data$Sensor_output == 0)
+FP_mmwave <- sum(mmwave_data$GroundTruth == 0 & mmwave_data$Sensor_output == 1)
+FN_mmwave <- sum(mmwave_data$GroundTruth == 1 & mmwave_data$Sensor_output == 0)
+```
+
+```{r}
+#now onto the performance metrics of the mmwave sensor
+#accuracy: proportion of correct predictions = (TP+TN)/(TP+TN+FP+FN)
+accuracy_mmwave <- (TP_mmwave + TN_mmwave) / (TP_mmwave + TN_mmwave + FP_mmwave + FN_mmwave)
+
+#sensitivity/recall/true positive rate: ability to detect actual movement = TP/(TP+FN)
+sensitivity_mmwave <- TP_mmwave / (TP_mmwave + FN_mmwave)
+
+#specificity/true negative rate: ability to detect no movement correctly = TN/(TN+FP)
+specificity_mmwave <- TN_mmwave / (TN_mmwave + FP_mmwave)
+
+#false positive rate: false alarms = FP/(FP+TN)
+false_positive_rate_mmwave <- FP_mmwave / (FP_mmwave + TN_mmwave)
+
+#false negative rate: missed movements = FN/(TP+FN)
+false_negative_rate_mmwave <- FN_mmwave / (TP_mmwave + FN_mmwave)
+
+#overall error rate = (FP+FN)/(TP+TN+FP+FN)
+error_rate_mmwave <- (FP_mmwave + FN_mmwave) / (TP_mmwave + TN_mmwave + FP_mmwave + FN_mmwave)
+
+cat("Accuracy:", accuracy_mmwave, "\n")
+cat("Sensitivity:", sensitivity_mmwave, "\n")
+cat("Specificity:", specificity_mmwave, "\n")
+cat("False Positive Rate:", false_positive_rate_mmwave, "\n")
+cat("False Negative Rate:", false_negative_rate_mmwave, "\n")
+cat("Error Rate:", error_rate_mmwave, "\n")
+```
+```{r}
+#chisquare test for PIR and mmWave
+chisq.test(table(pir_data$ActivityType, pir_data$Sensor_output))
+chisq.test(table(mmwave_data$ActivityType, mmwave_data$Sensor_output))
+```
+```{r}
+#both chi square tests show a p-value of < 0.05, which means we can reject our nul-hypothesis (detection rate is the same across all activity types), therefore PIR and mmWave detection significantly differs between activity types
+
+#let's put the difference between groups in a table to make is more visual!
+table(pir_data$ActivityType, pir_data$Sensor_output)
+table(mmwave_data$ActivityType, mmwave_data$Sensor_output)
+```
+```{r}
+#now we model the effects of distance and activity type on detection probability
+model_pir <- glm(Sensor_output ~ Distance_m + ActivityType,
+                 data = pir_data,
+                 family = binomial)
+
+summary(model_pir)
+```
+```{r}
+#what this means^: distance significantly affects detection probability (p<0.05) but the effect is small -> Detection probability changes slightly with increasing distance. No significant evidence that PIR detects humans differently from dogs. The machine result is very high, showing (almost) perfect separation, which is consistent with the fact that is has never been detected by the PIR sensor. All in all, the activity type did not significantly affect detection probability.
+```
+
+```{r}
+#and now for the mmWave
+model_mmwave <- glm(Sensor_output ~ Distance_m + ActivityType,
+                 data = mmwave_data,
+                 family = binomial)
+
+summary(model_mmwave)
+```
+```{r}
+#what this means^: there is no significant effect of distance and no significant difference between dog detection and human detection. There is a significant difference with machine detection, meaning the mmWave detects machine movement differently from animal movement.
+```
+
+```{r}
+#now we compare the sensors also using a glm
+model_combined <- glm(
+  Sensor_output ~ Distance_m + ActivityType + SensorType,
+  data = cyberdata,
+  family = binomial
+)
+
+summary(model_combined)
+```
+```{r}
+#odds dog vs machine:
+exp(-2.8578)
+```
+
+```{r}
+#what this means^: model compares human vs dog, machine vs dog and PIR vs mmWave. Across both sensors, detection performance does not significantly change between 0.5 m, 2 m, and 3 m (only for PIR separately but still just a small significance). Machine movement is detected significantly less often than dog movement.Machine movement is about 94% less likely to be detected than dog movement (see odds ratio above). There is no statistically significant difference between PIR and mmWave sensors in detection probability and thus they perform similar in reliability.
+#shorter: PIR and mmWave sensors perform similarly overall, both sensors may miss certain types of movement, machine movement is significantly less likely to be detected -> Motion sensor logs may not reliably detect all types of movement and should therefore be interpreted with caution in forensic investigations.
+```
+
+```{r}
+library(chron)
+library(ggplot2)
+```
+
+
+```{r}
+#now let's see if there is a difference in delay time
+cyberdata$Sensor_Time <- chron(times = cyberdata$Sensor_Time)
+cyberdata$StartTime   <- chron(times = cyberdata$StartTime)
+
+cyberdata$Delay <- as.numeric(cyberdata$Sensor_Time - cyberdata$StartTime) * 24*60*60
+t.test(Delay ~ SensorType, data = cyberdata)
+
+```
+
+```{r}
+#this means there is no statistically significant difference (p>0.05) in detection delay between the PIR and mmWave sensors.mmWave detects movement about 0.4 seconds slower than PIR but detection times are probably comparable.
+```
+
+```{r}
+#onto the visuals
+#detection rate by activity
+ggplot(cyberdata, aes(x = ActivityType, fill = factor(Sensor_output))) +
+  geom_bar(position = "fill") +
+  facet_wrap(~SensorType) +
+  labs(
+    title = "Detection Rate by Activity Type",
+    x = "Activity Type",
+    y = "Proportion",
+    fill = "Sensor Output"
+  ) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(values = c(
+  "0" = "#E74C3C",
+  "1" = "#2ECC71"
+))
+```
+
+```{r}
+#detection by distance
+ggplot(cyberdata, aes(x = factor(Distance_m), fill = factor(Sensor_output))) +
+  geom_bar(position = "fill") +
+  facet_wrap(~SensorType) +
+  labs(
+    title = "Detection Rate by Distance",
+    x = "Distance (m)",
+    y = "Proportion detected"
+  ) +
+  scale_fill_manual(values = c(
+  "0" = "#E74C3C",
+  "1" = "#2ECC71"
+))
+```
+
+```{r}
+#detction delay comparison
+ggplot(cyberdata, aes(x = SensorType, y = Delay, fill = SensorType)) +
+  geom_boxplot() +
+  labs(
+    title = "Detection Delay by Sensor Type",
+    x = "Sensor Type",
+    y = "Delay (seconds)"
+  ) 
+```
+```{r}
+#overall sensor accuracy comparison
+cyberdata$Correct <- ifelse(cyberdata$GroundTruth == cyberdata$Sensor_output, 1, 0)
+
+ggplot(cyberdata, aes(x = SensorType, fill = factor(Correct))) +
+  geom_bar(position = "fill") +
+  labs(
+    title = "Overall Detection Accuracy by Sensor",
+    x = "Sensor Type",
+    y = "Proportion",
+    fill = "Correct Detection"
+  ) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(values = c(
+  "0" = "#E74C3C",
+  "1" = "#2ECC71"
+))
+```
+```{r}
+#detection rate per distance like above but then with percentages, choose one of those 2
+ggplot(cyberdata, aes(x = factor(Distance_m), fill = factor(Sensor_output))) +
+  geom_bar(position = "fill") +
+  facet_wrap(~SensorType) +
+  labs(
+    title = "Detection Rate by Distance",
+    x = "Distance (meters)",
+    y = "Detection Proportion",
+    fill = "Sensor Output"
+  ) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(values = c(
+  "0" = "#E74C3C",
+  "1" = "#2ECC71"
+))
+```
+
+```{r}
+movement_data <- subset(cyberdata, GroundTruth == 1)
+
+ggplot(movement_data, aes(x = ActivityType, fill = factor(Sensor_output))) +
+  geom_bar(position = "fill") +
+  facet_wrap(~SensorType) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(
+    values = c("0" = "#E74C3C", "1" = "#2ECC71"),
+    labels = c("Movement missed", "Movement detected"),
+    name = "Detection"
+  ) +
+  labs(
+    title = "Detection Rate by Activity",
+    x = "Activity Type",
+    y = "Proportion"
+  ) +
+  theme_minimal()
+```
+
+```{r}
+movement_data <- subset(cyberdata, GroundTruth == 1)
+
+ggplot(movement_data, aes(x = factor(Distance_m), fill = factor(Sensor_output))) +
+  geom_bar(position = "fill") +
+  facet_wrap(~SensorType) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(
+    values = c("0" = "#E74C3C", "1" = "#2ECC71"),
+    labels = c("Movement missed", "Movement detected"),
+    name = "Detection"
+  ) +
+  labs(
+    title = "Detection Rate by Distance",
+    x = "Distance (m)",
+    y = "Proportion"
+  ) +
+  theme_minimal()
+```
+
