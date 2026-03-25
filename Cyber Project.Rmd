@@ -50,7 +50,7 @@ FN_PIR <- sum(pir_data$GroundTruth == 1 & pir_data$Sensor_output == 0)
 ```
 
 ```{r}
-#now onto the performance metrics of the PIR sensor
+#now onto the performance metrics of the PIR sensor overall
 #accuracy: proportion of correct predictions = (TP+TN)/(TP+TN+FP+FN)
 accuracy_PIR <- (TP_PIR + TN_PIR) / (TP_PIR + TN_PIR + FP_PIR + FN_PIR)
 
@@ -75,6 +75,45 @@ cat("Specificity:", specificity_PIR, "\n")
 cat("False Positive Rate:", false_positive_rate_PIR, "\n")
 cat("False Negative Rate:", false_negative_rate_PIR, "\n")
 cat("Error Rate:", error_rate_PIR, "\n")
+```
+```{r}
+#now for human movement only
+pir_human <- subset(pir_data, ActivityType == "Human_walking")
+
+TP_PIR_human <- sum(pir_human$GroundTruth == 1 & pir_human$Sensor_output == 1)
+TN_PIR_human <- sum(pir_human$GroundTruth == 0 & pir_human$Sensor_output == 0)
+FP_PIR_human <- sum(pir_human$GroundTruth == 0 & pir_human$Sensor_output == 1)
+FN_PIR_human <- sum(pir_human$GroundTruth == 1 & pir_human$Sensor_output == 0)
+
+accuracy_PIR_human <- (TP_PIR_human + TN_PIR_human) / 
+                      (TP_PIR_human + TN_PIR_human + FP_PIR_human + FN_PIR_human)
+cat("Accuracy:", accuracy_PIR_human, "\n")
+```
+```{r}
+#now for dog
+pir_dog <- subset(pir_data, ActivityType == "Dog_walking")
+
+TP_PIR_dog <- sum(pir_dog$GroundTruth == 1 & pir_dog$Sensor_output == 1)
+TN_PIR_dog <- sum(pir_dog$GroundTruth == 0 & pir_dog$Sensor_output == 0)
+FP_PIR_dog <- sum(pir_dog$GroundTruth == 0 & pir_dog$Sensor_output == 1)
+FN_PIR_dog <- sum(pir_dog$GroundTruth == 1 & pir_dog$Sensor_output == 0)
+
+accuracy_PIR_dog <- (TP_PIR_dog + TN_PIR_dog) / 
+                      (TP_PIR_dog + TN_PIR_dog + FP_PIR_dog + FN_PIR_dog)
+cat("Accuracy:", accuracy_PIR_dog, "\n")
+```
+```{r}
+#now for the machine
+pir_machine <- subset(pir_data, ActivityType == "Machine")
+
+TP_PIR_machine <- sum(pir_machine$GroundTruth == 1 & pir_machine$Sensor_output == 1)
+TN_PIR_machine <- sum(pir_machine$GroundTruth == 0 & pir_machine$Sensor_output == 0)
+FP_PIR_machine <- sum(pir_machine$GroundTruth == 0 & pir_machine$Sensor_output == 1)
+FN_PIR_machine <- sum(pir_machine$GroundTruth == 1 & pir_machine$Sensor_output == 0)
+
+accuracy_PIR_machine <- (TP_PIR_machine + TN_PIR_machine) / 
+                      (TP_PIR_machine + TN_PIR_machine + FP_PIR_machine + FN_PIR_machine)
+cat("Accuracy:", accuracy_PIR_machine, "\n")
 ```
 
 ```{r}
@@ -112,6 +151,47 @@ cat("False Positive Rate:", false_positive_rate_mmwave, "\n")
 cat("False Negative Rate:", false_negative_rate_mmwave, "\n")
 cat("Error Rate:", error_rate_mmwave, "\n")
 ```
+```{r}
+#now for only human
+mmwave_human <- subset(mmwave_data, ActivityType == "Human_walking")
+
+TP_mm_human <- sum(mmwave_human$GroundTruth == 1 & mmwave_human$Sensor_output == 1)
+TN_mm_human <- sum(mmwave_human$GroundTruth == 0 & mmwave_human$Sensor_output == 0)
+FP_mm_human <- sum(mmwave_human$GroundTruth == 0 & mmwave_human$Sensor_output == 1)
+FN_mm_human <- sum(mmwave_human$GroundTruth == 1 & mmwave_human$Sensor_output == 0)
+
+accuracy_mm_human <- (TP_mm_human + TN_mm_human) / 
+                     (TP_mm_human + TN_mm_human + FP_mm_human + FN_mm_human)
+cat("Accuracy:", accuracy_mm_human, "\n")
+```
+```{r}
+#now for the dog
+mmwave_dog <- subset(mmwave_data, ActivityType == "Dog_walking")
+
+TP_mm_dog <- sum(mmwave_dog$GroundTruth == 1 & mmwave_dog$Sensor_output == 1)
+TN_mm_dog <- sum(mmwave_dog$GroundTruth == 0 & mmwave_dog$Sensor_output == 0)
+FP_mm_dog <- sum(mmwave_dog$GroundTruth == 0 & mmwave_dog$Sensor_output == 1)
+FN_mm_dog <- sum(mmwave_dog$GroundTruth == 1 & mmwave_dog$Sensor_output == 0)
+
+accuracy_mm_dog <- (TP_mm_dog + TN_mm_dog) / 
+                     (TP_mm_dog + TN_mm_dog + FP_mm_dog + FN_mm_dog)
+cat("Accuracy:", accuracy_mm_dog, "\n")
+```
+```{r}
+#now for the machine
+mmwave_machine <- subset(mmwave_data, ActivityType == "Machine")
+
+TP_mm_machine <- sum(mmwave_machine$GroundTruth == 1 & mmwave_machine$Sensor_output == 1)
+TN_mm_machine <- sum(mmwave_machine$GroundTruth == 0 & mmwave_machine$Sensor_output == 0)
+FP_mm_machine <- sum(mmwave_machine$GroundTruth == 0 & mmwave_machine$Sensor_output == 1)
+FN_mm_machine <- sum(mmwave_machine$GroundTruth == 1 & mmwave_machine$Sensor_output == 0)
+
+accuracy_mm_machine <- (TP_mm_machine + TN_mm_machine) / 
+                     (TP_mm_machine + TN_mm_machine + FP_mm_machine + FN_mm_machine)
+cat("Accuracy:", accuracy_mm_machine, "\n")
+```
+
+
 ```{r}
 #chisquare test for PIR and mmWave
 chisq.test(table(pir_data$ActivityType, pir_data$Sensor_output))
